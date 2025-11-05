@@ -4,6 +4,7 @@ from enum import  Enum
 from typing import Optional
 
 class ProjectStatus(Enum):
+    """Перечисление статусов проекта"""
     PLANNING = "Планируется"
     IN_PROGRESS = "В работе"
     TESTING = "Тестирование"
@@ -11,6 +12,7 @@ class ProjectStatus(Enum):
     ON_HOLD = "Ожидание"
 
 class TaskPriority(Enum):
+    """Перечисление приоритетов задачи"""
     LOW = "Низкий"
     MEDIUM = "Средний"
     HIGH = "Высокий"
@@ -19,6 +21,7 @@ class TaskPriority(Enum):
 
 @dataclass
 class Project:
+    """Класс проекта"""
     id: Optional[int]
     name: str
     description: str
@@ -43,6 +46,7 @@ class Project:
 
 @dataclass
 class Task:
+    """Класс задачи"""
     id: Optional[int]
     project_id: int
     title: str
