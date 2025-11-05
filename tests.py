@@ -2,17 +2,13 @@ import pytest
 import sys
 import os
 from datetime import datetime
-
-# Добавляем путь к корню проекта для импортов
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from app.database import DatabaseManager
 from app.models import Project, Task, ProjectStatus, TaskPriority
 
 
 class TestDatabase:
     """Тесты для базы данных с использованием tmp_path"""
-
     @pytest.fixture
     def db(self, tmp_path):
         """Создание базы данных во временной директории"""
@@ -38,13 +34,9 @@ class TestDatabase:
             budget=100000.0,
             team_size=5
         )
-
         project_id = db.add_project(project)
-
         assert project_id is not None
         assert project_id > 0
-
-        # Проверяем что проект добавлен в БД
         projects = db.get_all_projects()
         assert len(projects) == 1
         assert projects[0].name == "Тестовый проект"
@@ -76,9 +68,7 @@ class TestDatabase:
             deadline=datetime(2024, 3, 31),
             status=ProjectStatus.IN_PROGRESS
         )
-
         task_id = db.add_task(task)
-
         assert task_id is not None
         assert task_id > 0
 
@@ -170,7 +160,6 @@ class TestDatabase:
             deadline=datetime(2024, 2, 1),
             status=ProjectStatus.IN_PROGRESS
         )
-
         task2 = Task(
             id=None,
             project_id=project_id,
@@ -181,13 +170,11 @@ class TestDatabase:
             deadline=datetime(2024, 2, 15),
             status=ProjectStatus.PLANNING
         )
-
         db.add_task(task1)
         db.add_task(task2)
 
         # Получаем задачи проекта
         tasks = db.get_tasks_by_project(project_id)
-
         assert len(tasks) == 2
         assert tasks[0].title == "Задача 1"
         assert tasks[1].title == "Задача 2"
@@ -232,8 +219,7 @@ class TestDatabase:
         projects = db.get_all_projects()
         assert len(projects) == 0
 
-        # Проверяем что задачи тоже удалены (каскадное удаление)
-        # При попытке получить задачи несуществующего проекта должна вернуться пустой список
+        # Проверяем что задачи тоже удалены
         tasks_after = db.get_tasks_by_project(project_id)
         assert len(tasks_after) == 0
 
@@ -253,8 +239,7 @@ class TestDatabase:
 
     def test_integration_workflow(self, db):
         """Интеграционный тест полного workflow"""
-
-        # 1. Создаем проект
+        # Создаем проект
         project = Project(
             id=None,
             name="Интеграционный тест",
@@ -266,14 +251,12 @@ class TestDatabase:
             team_size=4
         )
         project_id = db.add_project(project)
-
-        # 2. Добавляем задачи
+        # Добавляем задачи
         tasks_data = [
             ("Анализ требований", "Анна", TaskPriority.HIGH),
             ("Разработка", "Иван", TaskPriority.MEDIUM),
             ("Тестирование", "Петр", TaskPriority.LOW)
         ]
-
         for title, assignee, priority in tasks_data:
             task = Task(
                 id=None,
@@ -286,25 +269,19 @@ class TestDatabase:
                 status=ProjectStatus.PLANNING
             )
             db.add_task(task)
-
-        # 3. Проверяем что все создалось
+        # Проверяем что все создалось
         projects = db.get_all_projects()
         assert len(projects) == 1
         assert projects[0].name == "Интеграционный тест"
-
         tasks = db.get_tasks_by_project(project_id)
         assert len(tasks) == 3
-
         # 4. Удаляем одну задачу
         task_to_delete = tasks[0].id
         db.del_task(task_to_delete)
-
         tasks_after_delete = db.get_tasks_by_project(project_id)
         assert len(tasks_after_delete) == 2
-
         # 5. Удаляем проект (задачи удалятся каскадно)
         db.del_project(project_id)
-
         projects_after_delete = db.get_all_projects()
         assert len(projects_after_delete) == 0
 
@@ -324,7 +301,6 @@ class TestModels:
             budget=150000.0,
             team_size=6
         )
-
         assert project.id == 1
         assert project.name == "Тестовый проект"
         assert project.status == ProjectStatus.IN_PROGRESS
@@ -343,7 +319,6 @@ class TestModels:
             deadline=datetime(2024, 3, 15),
             status=ProjectStatus.TESTING
         )
-
         assert task.id == 1
         assert task.project_id == 1
         assert task.title == "Тестовая задача"
@@ -363,9 +338,7 @@ class TestModels:
             budget=99999.99,
             team_size=7
         )
-
         project_dict = project.to_dict()
-
         assert project_dict['id'] == 1
         assert project_dict['name'] == "Проект для dict"
         assert project_dict['status'] == "Завершён"
@@ -383,9 +356,7 @@ class TestModels:
             deadline=datetime(2024, 4, 1),
             status=ProjectStatus.ON_HOLD
         )
-
         task_dict = task.to_dict()
-
         assert task_dict['id'] == 1
         assert task_dict['title'] == "Задача для dict"
         assert task_dict['assignee'] == "Анна"
@@ -395,7 +366,6 @@ class TestModels:
 
 class TestEnums:
     """Тесты для перечислений"""
-
     def test_project_status_values(self):
         """Тест значений статусов проектов"""
         assert ProjectStatus.PLANNING.value == "Планируется"
@@ -415,7 +385,6 @@ class TestEnums:
         """Тест создания статуса из строки"""
         status = ProjectStatus("Планируется")
         assert status == ProjectStatus.PLANNING
-
         status = ProjectStatus("В работе")
         assert status == ProjectStatus.IN_PROGRESS
 
@@ -423,7 +392,6 @@ class TestEnums:
         """Тест создания приоритета из строки"""
         priority = TaskPriority("Высокий")
         assert priority == TaskPriority.HIGH
-
         priority = TaskPriority("Срочный")
         assert priority == TaskPriority.CRITICAL
 

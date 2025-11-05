@@ -5,14 +5,9 @@ from app.gui import ProjectManagementGUI
 
 def main():
     app = QApplication(sys.argv)
-
-
-    # Настройка стиля приложения
     app.setStyle('windows11')
-
     window = ProjectManagementGUI()
     window.show()
-
     sys.exit(app.exec())
 
 
