@@ -11,6 +11,7 @@ class DatabaseManager:
     def _init_database(self):
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
 
                 # Таблица проектов
@@ -50,6 +51,7 @@ class DatabaseManager:
     def add_project(self, project: Project) -> int:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('''
                             INSERT INTO projects (name, description, start_date, end_date, status, budget, team_size)
@@ -71,6 +73,7 @@ class DatabaseManager:
     def add_task(self, task: Task) -> int:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('''
                             INSERT INTO tasks (project_id, title, description, assignee, priority, deadline, status)
@@ -92,6 +95,7 @@ class DatabaseManager:
     def del_project(self, project_id: int) -> bool:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('DELETE FROM projects WHERE id = ?', (project_id,))
                 conn.commit()
@@ -102,6 +106,7 @@ class DatabaseManager:
     def del_task(self, task_id: int) -> bool:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
                 conn.commit()
@@ -112,6 +117,7 @@ class DatabaseManager:
     def get_all_projects(self) -> List[Project]:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('SELECT * FROM projects ORDER BY created_at DESC')
                 rows = cursor.fetchall()
@@ -145,6 +151,7 @@ class DatabaseManager:
     def get_tasks_by_project(self, project_id: int) -> List[Task]:
         try:
             with sqlite3.connect(self.db_path) as conn:
+                conn.execute("PRAGMA foreign_keys = ON")
                 cursor = conn.cursor()
                 cursor.execute('''
                     SELECT * FROM tasks 
