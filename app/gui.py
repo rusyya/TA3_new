@@ -213,9 +213,9 @@ class ProjectManagementGUI(QMainWindow):
     def setup_projects_table(self):
         """Настройка таблицы проектов"""
         self.projects_table.setStyleSheet("font-family: Inter;")
-        self.projects_table.setColumnCount(7)
+        self.projects_table.setColumnCount(8)
         self.projects_table.setHorizontalHeaderLabels([
-            'ID', 'Название', 'Статус', 'Начало', 'Окончание', 'Бюджет', 'Команда'
+            'ID', 'Название', 'Описание', 'Статус', 'Начало', 'Окончание', 'Бюджет', 'Команда'
         ])
         self.projects_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.projects_table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -402,12 +402,13 @@ class ProjectManagementGUI(QMainWindow):
             for row, project in enumerate(projects):
                 self.projects_table.setItem(row, 0, QTableWidgetItem(str(project.id)))
                 self.projects_table.setItem(row, 1, QTableWidgetItem(project.name))
-                self.projects_table.setItem(row, 2, QTableWidgetItem(project.status.value))
-                self.projects_table.setItem(row, 3, QTableWidgetItem(project.start_date.strftime('%Y-%m-%d')))
+                self.projects_table.setItem(row, 2, QTableWidgetItem(project.description))
+                self.projects_table.setItem(row, 3, QTableWidgetItem(project.status.value))
+                self.projects_table.setItem(row, 4, QTableWidgetItem(project.start_date.strftime('%Y-%m-%d')))
                 end_date = project.end_date.strftime('%Y-%m-%d') if project.end_date else '-'
-                self.projects_table.setItem(row, 4, QTableWidgetItem(end_date))
-                self.projects_table.setItem(row, 5, QTableWidgetItem(f"₽{project.budget:,.2f}"))
-                self.projects_table.setItem(row, 6, QTableWidgetItem(str(project.team_size)))
+                self.projects_table.setItem(row, 5, QTableWidgetItem(end_date))
+                self.projects_table.setItem(row, 6, QTableWidgetItem(f"₽{project.budget:,.2f}"))
+                self.projects_table.setItem(row, 7, QTableWidgetItem(str(project.team_size)))
 
         except Exception as e:
             self.logger.log_error(e)
