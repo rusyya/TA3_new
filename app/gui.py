@@ -15,6 +15,11 @@ from PySide6.QtGui import QFont
 from app.database import DatabaseManager
 from app.models import Project, Task, ProjectStatus, TaskPriority
 from app.logger import ActivityLogger
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QSplitter
 
 
 class ProjectManagementGUI(QMainWindow):
@@ -480,30 +485,82 @@ class ProjectManagementGUI(QMainWindow):
         event.accept()
 
     def show_logs(self):
-        """Показать логи из файла"""
+        """Показать логи из файла с графиком активности"""
         try:
             if os.path.exists("activity.log"):
                 with open("activity.log", 'r', encoding='utf-8') as f:
                     logs = f.read()
-
-                # Создаем простое диалоговое окно с логами
                 log_dialog = QDialog(self)
-                log_dialog.setWindowTitle("Логи приложения")
-                log_dialog.setGeometry(150, 150, 900, 600)
-
+                log_dialog.setWindowTitle("Логи и статистика приложения")
+                log_dialog.setGeometry(150, 150, 1000, 700)
                 layout = QVBoxLayout(log_dialog)
-
-                # Текстовое поле с логами
+                # Создаем разделитель для логов и графика
+                splitter = QSplitter(Qt.Vertical)
+                figure = Figure(figsize=(8, 3))
+                canvas = FigureCanvas(figure)
+                # Анализируем активность по дням
+                activity_by_day = self.analyze_activity()
+                if activity_by_day:
+                    ax = figure.add_subplot(111)
+                    dates = list(activity_by_day.keys())
+                    counts = list(activity_by_day.values())
+                    sorted_data = sorted(zip(dates, counts), key=lambda x: x[0])
+                    dates = [item[0] for item in sorted_data]
+                    counts = [item[1] for item in sorted_data]
+                    formatted_dates = [date.strftime('%d.%m') for date in dates]
+                    bars = ax.bar(formatted_dates, counts, color='#4CAF50', alpha=0.7)
+                    for bar, count in zip(bars, counts):
+                        height = bar.get_height()
+                        ax.text(bar.get_x() + bar.get_width() / 2., height + 0.1,
+                                f'{count}', ha='center', va='bottom', fontsize=8)
+                    ax.set_title('Активность по дням', fontsize=12, fontweight='bold')
+                    ax.set_ylabel('Событий')
+                    ax.grid(True, alpha=0.3)
+                    plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+                    figure.tight_layout()
+                else:
+                    ax = figure.add_subplot(111)
+                    ax.text(0.5, 0.5, 'Нет данных для графика',
+                            ha='center', va='center', transform=ax.transAxes)
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                splitter.addWidget(canvas)
+                # Нижняя часть - логи
                 log_text = QTextEdit()
                 log_text.setPlainText(logs)
                 log_text.setReadOnly(True)
-                layout.addWidget(log_text)
+                log_text.setFontFamily("Courier New")
+                log_text.setFontPointSize(9)
+                splitter.addWidget(log_text)
+                splitter.setSizes([300, 400])
+                layout.addWidget(splitter)
 
-                # Кнопка закрытия
-
+                close_btn = QPushButton("Закрыть")
+                close_btn.clicked.connect(log_dialog.close)
+                layout.addWidget(close_btn)
                 log_dialog.exec()
             else:
                 QMessageBox.information(self, "Логи", "Файл логов не найден")
 
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось прочитать логи: {str(e)}")
+
+    def analyze_activity(self):
+        """Анализ логов и подсчет активности по дням"""
+        activity_by_day = {}
+        try:
+            if not os.path.exists("activity.log"):
+                return activity_by_day
+            with open("activity.log", 'r', encoding='utf-8') as f:
+                for line in f:
+                    if len(line) >= 19:
+                        date_str = line[:10]  # Берем первые 10 символов (YYYY-MM-DD)
+                        try:
+                            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                            activity_by_day[date] = activity_by_day.get(date, 0) + 1
+                        except ValueError:
+                            continue
+            return activity_by_day
+        except Exception as e:
+            print(f"Ошибка анализа логов: {e}")
+            return {}
