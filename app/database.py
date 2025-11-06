@@ -61,7 +61,7 @@ class DatabaseManager:
                     project.description,
                     project.start_date.strftime('%Y-%m-%d'),
                     project.end_date.strftime('%Y-%m-%d') if project.end_date else None,
-                    project.status.value,  # Используем русские названия из enum
+                    project.status.value,
                     project.budget,
                     project.team_size
                 ))
@@ -83,9 +83,9 @@ class DatabaseManager:
                     task.title,
                     task.description,
                     task.assignee,
-                    task.priority.value,  # Используем русские названия из enum
+                    task.priority.value,
                     task.deadline.strftime('%Y-%m-%d'),
-                    task.status.value  # Используем русские названия из enum
+                    task.status.value
                 ))
                 conn.commit()
                 return cursor.lastrowid
@@ -132,7 +132,7 @@ class DatabaseManager:
                         except ValueError:
                             end_date = None
 
-                    # Создаем объект Project с правильным статусом из enum
+                    # Создаём объект Project со статусом из enum
                     project = Project(
                         id=row[0],
                         name=row[1],
@@ -162,7 +162,7 @@ class DatabaseManager:
 
                 tasks = []
                 for row in rows:
-                    # Создаем объект Task с правильными enum значениями
+                    # Создаём объект Task с enum значениями
                     task = Task(
                         id=row[0],
                         project_id=row[1],
